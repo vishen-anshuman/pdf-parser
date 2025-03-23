@@ -1,0 +1,22 @@
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/hello/User
+Accept: application/json
+
+###
+POST /api/v1/pdf/upload-pdfs/ HTTP/1.1
+Host: 127.0.0.1:8000
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary123456789
+
+------WebKitFormBoundary123456789
+Content-Disposition: form-data; name="files"; filename="anshumanResume.pdf"
+Content-Type: application/pdf
+
+
+
+
