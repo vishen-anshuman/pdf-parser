@@ -30,7 +30,7 @@ async def upload_pdfs(files: List[UploadFile]) -> Dict:
     try:
         filestore_provider = FileStoreFactory.get_provider(provider_name="local")
         ocr_provider = OCRFactory.get_provider(provider_name="llama")
-        llm_provider = LLMFactory.get_provider(provider_name="google-gemini")
+        llm_provider = LLMFactory.get_provider(provider_name="google_gemini")
         database_provider = DatabaseFactory.get_provider(provider_name="csv")
     except {FilestoreFactoryError, OCRFactoryError, LLMFactoryError, StoreFactoryError} as e:
         raise e
@@ -47,7 +47,7 @@ async def upload_pdfs(files: List[UploadFile]) -> Dict:
             logging.error(f"[/upload-pdfs/] Failed to upload file for {file.filename} : {e}")
             raise e
         # DO OCR
-        file_info = {"id": unique_id, "file_name": file.filename}
+        file_info = {"id": unique_id, "file_name": uploaded_file_path}
         uploaded_list.append(file_info)
     asyncio.create_task(__process_uploads(ocr_provider, llm_provider, database_provider, uploaded_list))
     logging.info(f"[/upload-pdfs/] Uploaded {len(uploaded_list)} files")
@@ -82,9 +82,10 @@ async def __upload_to_filestore(file, filestore_provider, unique_id):
         file_path = os.path.join(UPLOAD_DIR, new_file_name)
         with open(file_path, "wb") as f:
             f.write(await file.read())
-            f.close()
         uploaded_file_path = filestore_provider.upload_file(file_path, destination=f"pdf/{new_file_name}").get("file_path")
         logging.info(f"[__upload_to_filestore] Uploaded to filestore, {file_path}")
+        os.remove(file_path)
+        f.close()
         return uploaded_file_path, file_path
     except OSError as e:
         logging.error(f"File {new_file_name} could not be uploaded due to OS error: {e}", exc_info=True)

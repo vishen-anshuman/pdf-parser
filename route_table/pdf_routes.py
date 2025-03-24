@@ -16,7 +16,6 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
             raise BadRequestError(
                 message="Invalid file type. Only PDF files are allowed."
             )
-        await file.close()
     logging.info(f"[/upload-pdfs/] Received {len(files)} files, processing...")
     try:
         return await pdf_handlers.upload_pdfs(files)
@@ -24,6 +23,9 @@ async def upload_pdfs(files: List[UploadFile] = File(...)):
         raise ServerError(
             message=f"Failed to upload files: {e}"
         )
+    finally:
+        for file in files:
+            await file.close()
 
 
 @router.get("/retrieve/")
